@@ -31,3 +31,73 @@ build/
 
 ### VS Code ###
 .vscode/
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# IDEs
+.idea/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+### Maven ###
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+### IDEs ###
+# IntelliJ IDEA
+
+out/
+
+# Eclipse
+.settings/
+
+### Logs ###
+logs/
+*.out
+*.err
+
+### Tests / Coverage ###
+# JaCoCo & Surefire reports
+target/site/
+*.dump
+*.exec
+*.ser
+*.dat
+
+# Surefire test reports
+target/surefire-reports/
+target/failsafe-reports/
+
+### Sonar ###
+.sonar/
+.scannerwork/
+
+### Docker ###
+# local docker artifacts
+*.env
+docker-compose.override.yml
+# optional: ignore built images if exported
+*.tar
+
+### CI / Build cache ###
+.cache/
+.mvn/
+dependency-reduced-pom.xml
+
+### Other ###
+# temporary or local files
+*.swp
+*.tmp
+*.bak
+*~

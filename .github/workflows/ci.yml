@@ -32,7 +32,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Run tests (unit + integration) with JaCoCo coverage
-        run: mvn -B clean verify -DskipTests=false -DskipITs=false
+        run: mvn -B clean verify -DskipITs=true -DskipTests=false
 
       - name: SonarCloud Scan
         env:

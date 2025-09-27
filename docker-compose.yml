@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_DB: expense_db
+      POSTGRES_USER: manal
+      POSTGRES_PASSWORD: manal123
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: expense-app
+    depends_on:
+      postgres:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/expense_db
+      SPRING_DATASOURCE_USERNAME: manal
+      SPRING_DATASOURCE_PASSWORD: manal123
+      # Optional:
+      # SPRING_PROFILES_ACTIVE: prod
+      # APPLICATION_SECURITY_JWT_SECRET: change-me
+    ports:
+      - "8081:8081"
+
+volumes:
+  pgdata:

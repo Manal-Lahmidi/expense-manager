@@ -16,10 +16,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Sonar needs full history for PRs
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -28,12 +28,11 @@ jobs:
           java-version: 17
           cache: maven
 
-      # Testcontainers needs docker available on the runner
-      - name: Set up Docker Buildx (enables docker on runner)
+      - name: Enable Docker in Docker
         uses: docker/setup-buildx-action@v3
 
-      - name: Run Maven tests + JaCoCo (unit + integration)
-        run: mvn -B -DskipITs=false -DskipTests=false clean verify
+      - name: Run tests (unit + integration) with JaCoCo coverage
+        run: mvn -B clean verify -DskipTests=false -DskipITs=false
 
       - name: SonarCloud Scan
         env:
@@ -46,28 +45,13 @@ jobs:
             -Dsonar.organization=${SONAR_ORG} \
             -Dsonar.projectKey=${SONAR_PROJECT_KEY}
 
-      - name: Upload surefire reports (always)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: surefire-reports
-          path: target/surefire-reports
-
-      - name: Upload Jacoco HTML (always)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: jacoco-report
-          path: target/site/jacoco
-
   docker:
     name: Build & Push Docker image
     needs: build-test-sonar
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Log in to Docker Hub
@@ -86,15 +70,18 @@ jobs:
             type=raw,value=latest
             type=sha,format=long
             type=ref,event=branch
-            type=semver,pattern={{version}}
 
-      - name: Build and push
+      - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            MAVEN_ARGS=-DskipTests
 
-      - name: Show image tags
-        run: echo "Pushed: ${{ steps.meta.outputs.tags }}"
+      - name: Show pushed image tags
+        run: |
+          echo "✅ Docker image pushed successfully!"
+          echo "Tags: ${{ steps.meta.outputs.tags }}"

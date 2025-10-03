@@ -101,3 +101,5 @@ dependency-reduced-pom.xml
 *.tmp
 *.bak
 *~
+
+.env

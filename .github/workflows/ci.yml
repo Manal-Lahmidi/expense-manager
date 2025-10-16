@@ -1,4 +1,4 @@
-name: CI/CD
+name: CI pipeline
 
 on:
   push:
@@ -7,54 +7,41 @@ on:
     branches: [ main, master ]
 
 env:
-  JAVA_VERSION: '17'
-  REGISTRY: docker.io
   IMAGE_NAME: expense-manager
+  REGISTRY: docker.io
 
 jobs:
   build-test-sonar:
-    name: Build, Test (UT+IT), Coverage, Sonar
+    name: Build, Unit/IT tests, SonarCloud
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # SonarCloud needs full history for PRs
+          fetch-depth: 0  # Sonar needs full history for PRs
 
-      - name: Set up JDK
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: ${{ env.JAVA_VERSION }}
+          java-version: 17
           cache: maven
 
-      - name: Cache ~/.m2
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2-
-
-      - name: Enable Docker (for Testcontainers)
+      - name: Enable Docker in Docker
         uses: docker/setup-buildx-action@v3
 
-      - name: Build + tests (JaCoCo)
-        run: mvn -B -ntp clean verify -DskipITs=false -DskipTests=false
+      - name: Run tests (unit + integration) with JaCoCo coverage
+        run: mvn -B clean verify -DskipITs=true -DskipTests=false
 
-      # Run SonarCloud scan ONLY if token is provided
       - name: SonarCloud Scan
-        if: ${{ secrets.SONAR_TOKEN != '' && secrets.SONAR_ORG != '' && secrets.SONAR_PROJECT_KEY != '' }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_ORG: ${{ secrets.SONAR_ORG }}                    # e.g. manal-lahmidi  (ORG KEY)
-          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}    # e.g. Manal-Lahmidi_expense-manager
         run: >
-          mvn -B -ntp
-          org.sonarsource.scanner.maven:sonar-maven-plugin:5.2.0.4988:sonar
+          mvn -B -ntp org.sonarsource.scanner.maven:sonar-maven-plugin:5.2.0.4988:sonar
           -Dsonar.host.url=https://sonarcloud.io
-          -Dsonar.organization=${SONAR_ORG}
-          -Dsonar.projectKey=${SONAR_PROJECT_KEY}
+          -Dsonar.organization=manal-lahmidi
+          -Dsonar.projectKey=Manal-Lahmidi_expense-manager
           -Dsonar.token=${SONAR_TOKEN}
 
   docker:
@@ -63,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Log in to Docker Hub
@@ -83,7 +70,7 @@ jobs:
             type=sha,format=long
             type=ref,event=branch
 
-      - name: Build & push
+      - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -95,5 +82,5 @@ jobs:
 
       - name: Show pushed image tags
         run: |
-          echo "Tags:"
-          echo "${{ steps.meta.outputs.tags }}"
+          echo "Docker image pushed successfully!"
+          echo "Tags: ${{ steps.meta.outputs.tags }}"

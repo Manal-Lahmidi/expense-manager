@@ -39,7 +39,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
           -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.organization=<your_org_key_lowercase> \
+          -Dsonar.organization=<manal> \
           -Dsonar.projectKey=Manal-Lahmidi_expense-manager \
           -Dsonar.token=${SONAR_TOKEN}
 

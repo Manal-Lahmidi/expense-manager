@@ -173,6 +173,9 @@
 				<version>3.2.5</version>
 				<configuration>
 					<useModulePath>false</useModulePath>
+                    <systemPropertyVariables>
+                        <spring.profiles.active>test</spring.profiles.active>
+                    </systemPropertyVariables>
 				</configuration>
 			</plugin>
 
@@ -180,6 +183,11 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<version>3.2.5</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <spring.profiles.active>test</spring.profiles.active>
+                    </systemPropertyVariables>
+                </configuration>
 				<executions>
 					<execution>
 						<goals>

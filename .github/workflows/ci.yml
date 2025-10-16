@@ -34,7 +34,9 @@ jobs:
       - name: SonarCloud Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B -ntp org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.token=${SONAR_TOKEN}
+        run: mvn -B -ntp org.sonarsource.scanner.maven:5.2.0.4988:sonar \
+          -Dproject.settings=sonar-project.properties \
+          -Dsonar.token=${SONAR_TOKEN}
 
   docker:
     name: Build & Push Docker image

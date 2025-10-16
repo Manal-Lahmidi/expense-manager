@@ -31,19 +31,11 @@ jobs:
       - name: Enable Docker in Docker
         uses: docker/setup-buildx-action@v3
 
-      - name: Debug Sonar files/dir
-        run: |
-          echo "PWD=$(pwd)"
-          git rev-parse --show-toplevel || true
-          ls -la
-          echo "---- sonar-project.properties (if present) ----"
-          [ -f sonar-project.properties ] && sed -n '1,120p' sonar-project.properties || echo "MISSING"
-
       - name: SonarCloud Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: >
-          mvn -B -ntp org.sonarsource.scanner.maven:5.2.0.4988:sonar
+          mvn -B -ntp org.sonarsource.scanner.maven:sonar-maven-plugin:5.2.0.4988:sonar
           -Dsonar.host.url=https://sonarcloud.io
           -Dsonar.organization=manal-lahmidi
           -Dsonar.projectKey=Manal-Lahmidi_expense-manager

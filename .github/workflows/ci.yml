@@ -37,13 +37,9 @@ jobs:
       - name: SonarCloud Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_ORG: ${{ secrets.SONAR_ORG }}
-          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
         run: |
           mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -Dsonar.token=${SONAR_TOKEN} \
-            -Dsonar.organization=${SONAR_ORG} \
-            -Dsonar.projectKey=${SONAR_PROJECT_KEY}
 
   docker:
     name: Build & Push Docker image

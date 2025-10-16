@@ -32,14 +32,16 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Run tests (unit + integration) with JaCoCo coverage
-        run: mvn -B clean verify -DskipITs=true -DskipTests=false
+        run: mvn -B clean verify -DskipITs=false -DskipTests=false
 
       - name: SonarCloud Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.token=${SONAR_TOKEN} \
+        run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.organization=<your_org_key_lowercase> \
+          -Dsonar.projectKey=Manal-Lahmidi_expense-manager \
+          -Dsonar.token=${SONAR_TOKEN}
 
   docker:
     name: Build & Push Docker image

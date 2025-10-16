@@ -83,5 +83,5 @@ jobs:
 
       - name: Show pushed image tags
         run: |
-          echo "✅ Docker image pushed successfully!"
+          echo "Docker image pushed successfully!"
           echo "Tags: ${{ steps.meta.outputs.tags }}"

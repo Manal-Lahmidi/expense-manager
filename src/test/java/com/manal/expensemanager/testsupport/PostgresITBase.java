@@ -20,7 +20,8 @@ public abstract class PostgresITBase {
             new PostgreSQLContainer<>("postgres:16-alpine")
                     .withDatabaseName("testdb")
                     .withUsername("test")
-                    .withPassword("test");
+                    .withPassword("test")
+                    .withReuse(true);
 
     @DynamicPropertySource
     static void registerProps(DynamicPropertyRegistry r) {

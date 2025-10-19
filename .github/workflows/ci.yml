@@ -19,38 +19,11 @@ jobs:
     name: Build, Unit/IT tests, SonarCloud
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_DB: expense_db
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready -U postgres -d expense_db"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
-
-    # Spring Boot will pick these env vars automatically
-    env:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/expense_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      # If you use Flyway or Liquibase, keep them enabled by default.
-      # Example toggles (uncomment only if you *must*):
-      # SPRING_FLYWAY_ENABLED: "true"
-      # SPRING_LIQUIBASE_ENABLED: "true"
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Sonar PR decoration
+          fetch-depth: 0  # Sonar PR decoration needs history
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -59,22 +32,14 @@ jobs:
           java-version: 17
           cache: maven
 
-      - name: Install psql client (for pg_isready)
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      # ITs use Testcontainers → no DB service needed, no psql install/wait.
 
-      - name: Wait for Postgres to be ready
-        run: |
-          for i in {1..30}; do
-            pg_isready -h localhost -p 5432 -U postgres -d expense_db && exit 0
-            echo "Postgres not ready yet... ($i)"
-            sleep 2
-          done
-          echo "Postgres failed to become ready in time." && exit 1
-
-      - name: Run tests (unit + integration) with JaCoCo coverage
-        run: mvn -B clean verify -DskipITs=false -DskipTests=false
+      - name: Run tests (unit + integration) with JaCoCo
+        run: mvn -B -ntp clean verify -DskipTests=false -DskipITs=false
 
       - name: SonarCloud Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: >
           mvn -B -ntp org.sonarsource.scanner.maven:sonar-maven-plugin:5.2.0.4988:sonar
           -Dsonar.host.url=https://sonarcloud.io

@@ -6,20 +6,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {
-                // Turn off anything that would try to touch a DB
+                "spring.testcontainers.enabled=false",
                 "spring.autoconfigure.exclude=" +
                         "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration," +
                         "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration," +
                         "org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration," +
-                        "org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration",
-                // Stop Spring Boot 3.3 testcontainers auto-service-connection magic
-                "spring.testcontainers.enabled=false"
+                        "org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration"
         }
 )
-// DO NOT extend PostgresITBase here
-// DO NOT set @ActiveProfiles here
 class ExpenseManagerApplicationTests {
-
-    @Test
-    void contextLoads() {}
+    @org.springframework.boot.test.mock.mockito.MockBean
+    com.manal.expensemanager.repository.UserRepository userRepository;
+    @org.junit.jupiter.api.Test void contextLoads() {}
 }

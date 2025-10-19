@@ -5,28 +5,31 @@ services:
     restart: always
     environment:
       POSTGRES_DB: expense_db
-      POSTGRES_USER: manal
-      POSTGRES_PASSWORD: manal123
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d expense_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   app:
     build: .
     container_name: expense-app
     depends_on:
       postgres:
-        condition: service_started
+        condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/expense_db
-      SPRING_DATASOURCE_USERNAME: manal
-      SPRING_DATASOURCE_PASSWORD: manal123
-      # Optional:
-      # SPRING_PROFILES_ACTIVE: prod
-      # APPLICATION_SECURITY_JWT_SECRET: change-me
+      SPRING_DATASOURCE_URL: ${DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SERVER_PORT: 8081
     ports:
-      - "8081:8081"
+      - "${APP_PORT}:8081"
 
 volumes:
   pgdata:

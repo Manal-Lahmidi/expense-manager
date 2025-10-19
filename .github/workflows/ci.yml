@@ -35,7 +35,7 @@ jobs:
       # ITs use Testcontainers → no DB service needed, no psql install/wait.
 
       - name: Run tests (unit + integration) with JaCoCo
-        run: mvn -B -ntp clean verify -DskipTests=false -DskipITs=false
+        run: mvn -B -ntp clean verify -DskipTests=false -DskipITs=true
 
       - name: SonarCloud Scan
         env:

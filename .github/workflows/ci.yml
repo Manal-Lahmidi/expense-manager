@@ -34,7 +34,7 @@ jobs:
 
       # ITs use Testcontainers; no DB service needed.
 
-      - name: Run tests
+      - name: Running tests
         run: mvn -B -ntp clean verify -DskipITs=true -DskipTests=false
 
       - name: SonarCloud Scan

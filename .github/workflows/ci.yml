@@ -50,7 +50,8 @@ jobs:
         run: |
           mvn -B org.owasp:dependency-check-maven:check \
             -Dnvd.api.key=${NVD_API_KEY} \
-            -Dformat=HTML,JSON,XML
+            -Dformats=HTML,JSON,XML \
+            -DoutputDirectory=target/dependency-check
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
 
@@ -59,9 +60,9 @@ jobs:
         with:
           name: owasp-dependency-check
           path: |
-            **/dependency-check-report.html
-            **/dependency-check-report.json
-            **/dependency-check-report.xml
+            target/dependency-check/dependency-check-report.html
+            target/dependency-check/dependency-check-report.json
+            target/dependency-check/dependency-check-report.xml
 
       - name: SonarCloud Scan
         env:

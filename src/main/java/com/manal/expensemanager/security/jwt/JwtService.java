@@ -1,6 +1,7 @@
 package com.manal.expensemanager.security.jwt;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
 
@@ -11,10 +12,10 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private static final String SECRET_KEY = "manal-expense-app-super-secret-256key!!"; // 256-bit key minimum
-
     protected Key getSignInKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        String secretB64 = System.getenv("JWT_SECRET");
+        byte[] keyBytes = Decoders.BASE64.decode(secretB64); // expects base64
+        return Keys.hmacShaKeyFor(keyBytes);                 // HS256-safe (>=32 bytes)
     }
 
     public String generateToken(String email) {

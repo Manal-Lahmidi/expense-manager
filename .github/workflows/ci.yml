@@ -47,9 +47,21 @@ jobs:
           path: target/site/jacoco/
 
       - name: Run OWASP Dependency Check
-        run: mvn org.owasp:dependency-check-maven:check -DnvdApiKey=${NVD_API_KEY}
+        run: |
+          mvn -B org.owasp:dependency-check-maven:check \
+            -Dnvd.api.key=${NVD_API_KEY} \
+            -Dformat=HTML,JSON,XML
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+
+      - name: Publish OWASP reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: owasp-dependency-check
+          path: |
+            **/dependency-check-report.html
+            **/dependency-check-report.json
+            **/dependency-check-report.xml
 
       - name: SonarCloud Scan
         env:
@@ -112,13 +124,24 @@ jobs:
           build-args: |
             MAVEN_ARGS=-DskipTests
 
-      - name: Scan Docker Image for Vulnerabilities
-        uses: aquasecurity/trivy-action@master
+      # Scans your Docker image
+      - name: Trivy (SARIF → Code Scanning)
+        uses: aquasecurity/trivy-action@0.24.0
         with:
-          scan-type: 'image'
-          scan-ref: '${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest'
-          format: 'table'
-          exit-code: '1'
+          scan-type: image
+          image-ref: '${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest'
+          vuln-type: os,library
+          severity: CRITICAL,HIGH,MEDIUM
+          ignore-unfixed: true
+          format: sarif
+          output: trivy-image.sarif
+          exit-code: '0'
+
+      # Publishes results to GitHub Security tab
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-image.sarif
 
       - name: Show pushed image tags
         run: |
@@ -130,6 +153,9 @@ jobs:
         uses: 8398a7/action-slack@v3
         with:
           status: failure
-          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          # optional but useful:
+          fields: repo,message,commit,author,job,action,eventName,ref,workflow,branch
+          # channel: '#ci-notifications'  # optional if your webhook is channel-specific
+          github_token: ${{ secrets.GITHUB_TOKEN }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

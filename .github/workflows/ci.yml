@@ -36,6 +36,8 @@ jobs:
       # ITs use Testcontainers; no DB service needed.
 
       - name: Running tests
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: mvn -B -ntp clean verify -DskipITs=true -DskipTests=false
 
       - name: Generate Coverage Report

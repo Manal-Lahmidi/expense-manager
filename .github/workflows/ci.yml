@@ -38,6 +38,9 @@ jobs:
       - name: Running tests
         run: mvn -B -ntp clean verify -DskipITs=true -DskipTests=false
 
+      - name: Run OWASP Dependency Check
+        run: mvn org.owasp:dependency-check-maven:check
+
       - name: SonarCloud Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

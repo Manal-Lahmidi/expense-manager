@@ -13,7 +13,8 @@ env:
 permissions:
   contents: read
   pull-requests: read
-  packages: write  #for docker pushes
+  packages: write
+  security-events: write
 
 jobs:
   build-test-sonar:
@@ -53,7 +54,6 @@ jobs:
           mvn -B org.owasp:dependency-check-maven:check \
             -Dnvd.api.key=${NVD_API_KEY} \
             -Dformats=HTML,JSON,XML \
-            -DoutputDirectory=target/dependency-check
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
 
@@ -62,9 +62,9 @@ jobs:
         with:
           name: owasp-dependency-check
           path: |
-            target/dependency-check/dependency-check-report.html
-            target/dependency-check/dependency-check-report.json
-            target/dependency-check/dependency-check-report.xml
+            target/dependency-check-report.html
+            target/dependency-check-report.json
+            target/dependency-check-report.xml
 
       - name: SonarCloud Scan
         env:
@@ -142,6 +142,7 @@ jobs:
 
       # Publishes results to GitHub Security tab
       - name: Upload SARIF to GitHub Security
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-image.sarif
